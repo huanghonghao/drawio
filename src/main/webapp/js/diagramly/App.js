@@ -713,7 +713,7 @@ App.main = function(callback, createUi)
 					if (CryptoJS.MD5(content).toString() != '94ebd7472449efab95e00746ea00db60')
 					{
 						console.log('Change bootstrap script MD5 in the previous line:', CryptoJS.MD5(content).toString());
-						alert('[Dev] Bootstrap script change requires update of CSP');
+						// alert('[Dev] Bootstrap script change requires update of CSP');
 					}
 				}
 				
@@ -5248,7 +5248,7 @@ App.prototype.loadFile = function(id, sameWindow, file, success, force)
 				}
 				
 				var tempFile = new LocalFile(this, data, (urlParams['title'] != null) ?
-					decodeURIComponent(urlParams['title']) : this.defaultFilename, true);
+					decodeURIComponent(urlParams['title']) : this.defaultFilename, false);
 				tempFile.getHash = function()
 				{
 					return id;
@@ -5382,7 +5382,7 @@ App.prototype.loadFile = function(id, sameWindow, file, success, force)
 						}
 						
 						var tempFile = new LocalFile(this, text, (urlParams['title'] != null) ?
-							decodeURIComponent(urlParams['title']) : filename, true);
+							decodeURIComponent(urlParams['title']) : filename, false);
 						tempFile.getHash = function()
 						{
 							return id;

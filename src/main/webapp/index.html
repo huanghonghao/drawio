@@ -250,15 +250,16 @@
 		var t0 = new Date();
 
 		// Changes paths for local development environment
+		// TODO 本地调试需要改成你的源码服务器IP
 		if (urlParams['dev'] == '1')
 		{
 			// Used to request grapheditor/mxgraph sources in dev mode
-			var mxDevUrl = document.location.protocol + '//devhost.jgraph.com/drawio/src/main';
+			var mxDevUrl = '';
 			
 			// Used to request draw.io sources in dev mode
-			var drawDevUrl = document.location.protocol + '//devhost.jgraph.com/drawio/src/main/webapp/';
+			var drawDevUrl = '';
 			var geBasePath = drawDevUrl + '/js/grapheditor';
-			var mxBasePath = mxDevUrl + '/mxgraph';
+			var mxBasePath = drawDevUrl + '/mxgraph';
 			
 			if (document.location.protocol == 'file:')
 			{

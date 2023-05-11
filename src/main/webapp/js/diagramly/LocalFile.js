@@ -261,6 +261,7 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 			{
 				this.ui.doSaveLocalFile(data, title, (binary) ?
 					'image/png' : 'text/xml', binary);
+				done();
 			}
 			else
 			{
@@ -270,22 +271,53 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 					var format = (dot > 0) ? title.substring(dot + 1) : 'xml';
 	
 					// Do not update modified flag
-					new mxXmlRequest(SAVE_URL, 'format=' + format +
+					var userReq = new mxXmlRequest(SAVE_URL, 'format=' + format +
 						'&xml=' + encodeURIComponent(data) +
 						'&filename=' + encodeURIComponent(title) +
-						((binary) ? '&binary=1' : '')).
-						simulate(document, '_blank');
+						((binary) ? '&binary=1' : ''));
+					// var temp = this.authToken + ' ' +  _token;
+
+					// userReq.setRequestHeaders = function(request, params)
+					// {
+					// 	request.setRequestHeader('Authorization', temp);
+					// };
+
+					userReq.send(mxUtils.bind(this, function(e)
+					{
+						console.log(userReq)
+						console.log(e)
+						if (userReq.getStatus() === 401)
+						{
+							this.ui.showError(mxResources.get('error'), "401: 无权访问", mxResources.get('ok'));
+							error()
+						}
+						else if (userReq.getStatus() === 404) {
+							this.ui.showError(mxResources.get('error'), "404: 找不到资源", mxResources.get('ok'));
+							error()
+						} else if (userReq.getStatus() < 200 || userReq.getStatus() >= 300) {
+							this.ui.showError(mxResources.get('error'), userReq.getStatus() + ": " + userReq.request.statusText, mxResources.get('ok'));
+							error()
+						} else {
+							console.log(userReq.getText());
+							this.ui.showError("提示", "保存成功", mxResources.get('ok'));
+							done();
+						}
+					}), function(e) {
+						console.log(e);
+						error()
+					});
 				}
 				else
 				{
 					this.ui.handleError({message: mxResources.get('drawingTooLarge')}, mxResources.get('error'), mxUtils.bind(this, function()
 					{
-						mxUtils.popup(data);
+						// mxUtils.popup(data);
 					}));
+					error()
 				}
 			}
-			
-			done();
+
+			// done();
 		}
 	});
 	

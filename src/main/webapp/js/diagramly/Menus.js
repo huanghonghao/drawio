@@ -1536,106 +1536,106 @@
 			menu.addSeparator(parent);
 			editorUi.menus.addMenuItem(menu, 'runLayout', parent, null, null, mxResources.get('custom') + '...');
 		};
-		
-		this.put('help', new Menu(mxUtils.bind(this, function(menu, parent)
-		{
-			if (!mxClient.IS_CHROMEAPP && editorUi.isOffline())
-			{
-				this.addMenuItems(menu, ['about'], parent);
-			}
-			else
-			{
-				// No translation for menu item since help is english only
-				var item = menu.addItem('Search:', null, null, parent, null, null, false);
-				item.style.cursor = 'default';
-				
-				var input = document.createElement('input');
-				input.setAttribute('type', 'text');
-				input.setAttribute('size', '25');
-				input.style.borderWidth = '1px';
-				input.style.marginLeft = '8px';
 
-				mxEvent.addListener(input, 'keydown', mxUtils.bind(this, function(e)
-				{
-					var term = mxUtils.trim(input.value);
-					
-					if (e.keyCode == 13 && term.length > 0)
-					{
-						this.editorUi.openLink('https://www.drawio.com/search?src=' +
-							(EditorUi.isElectronApp ? 'DESKTOP' : encodeURIComponent(location.host)) + 
-							'&search=' + encodeURIComponent(term));
-						input.value = '';
-						EditorUi.logEvent({category: 'SEARCH-HELP', action: 'search', label: term});
-						
-						window.setTimeout(mxUtils.bind(this, function()
-						{
-							this.editorUi.hideCurrentMenu();
-						}), 0);
-					}
-	                else if (e.keyCode == 27)
-	                {
-	                    input.value = '';
-	                }
-				}));
-				
-				item.firstChild.nextSibling.appendChild(input);
-				
-				mxEvent.addGestureListeners(input, function(evt)
-				{
-					if (document.activeElement != input)
-					{
-						input.focus();
-					}
-					
-					mxEvent.consume(evt);
-				}, function(evt)
-				{
-					mxEvent.consume(evt);
-				}, function(evt)
-				{
-					mxEvent.consume(evt);
-				});
-				
-				window.setTimeout(function()
-				{
-					input.focus();
-				}, 0);
-
-				if (EditorUi.isElectronApp)
-				{
-					editorUi.actions.addAction('website...', function()
-					{
-						editorUi.openLink('https://www.drawio.com');
-					});
-					
-					editorUi.actions.addAction('check4Updates', function()
-					{
-						editorUi.checkForUpdates();
-					});
-					
-					this.addMenuItems(menu, ['-', 'keyboardShortcuts', 'quickStart',
-						'website', 'support', '-'], parent);
-
-					if (urlParams['disableUpdate'] != '1')
-					{
-						this.addMenuItems(menu, ['check4Updates'], parent);
-					}
-
-					this.addMenuItems(menu, ['openDevTools', '-', 'about'], parent);
-				}
-				else
-				{
-					this.addMenuItems(menu, ['-', 'keyboardShortcuts',
-						'quickStart', 'support', '-', 'about'], parent);
-				}
-			}
-			
-			if (urlParams['test'] == '1')
-			{
-				menu.addSeparator(parent);
-				this.addSubmenu('testDevelop', menu, parent);
-			}
-		})));
+		// this.put('help', new Menu(mxUtils.bind(this, function(menu, parent)
+		// {
+		// 	if (!mxClient.IS_CHROMEAPP && editorUi.isOffline())
+		// 	{
+		// 		this.addMenuItems(menu, ['about'], parent);
+		// 	}
+		// 	else
+		// 	{
+		// 		// No translation for menu item since help is english only
+		// 		var item = menu.addItem('Search:', null, null, parent, null, null, false);
+		// 		item.style.cursor = 'default';
+		//
+		// 		var input = document.createElement('input');
+		// 		input.setAttribute('type', 'text');
+		// 		input.setAttribute('size', '25');
+		// 		input.style.borderWidth = '1px';
+		// 		input.style.marginLeft = '8px';
+		//
+		// 		mxEvent.addListener(input, 'keydown', mxUtils.bind(this, function(e)
+		// 		{
+		// 			var term = mxUtils.trim(input.value);
+		//
+		// 			if (e.keyCode == 13 && term.length > 0)
+		// 			{
+		// 				this.editorUi.openLink('https://www.drawio.com/search?src=' +
+		// 					(EditorUi.isElectronApp ? 'DESKTOP' : encodeURIComponent(location.host)) +
+		// 					'&search=' + encodeURIComponent(term));
+		// 				input.value = '';
+		// 				EditorUi.logEvent({category: 'SEARCH-HELP', action: 'search', label: term});
+		//
+		// 				window.setTimeout(mxUtils.bind(this, function()
+		// 				{
+		// 					this.editorUi.hideCurrentMenu();
+		// 				}), 0);
+		// 			}
+	    //             else if (e.keyCode == 27)
+	    //             {
+	    //                 input.value = '';
+	    //             }
+		// 		}));
+		//
+		// 		item.firstChild.nextSibling.appendChild(input);
+		//
+		// 		mxEvent.addGestureListeners(input, function(evt)
+		// 		{
+		// 			if (document.activeElement != input)
+		// 			{
+		// 				input.focus();
+		// 			}
+		//
+		// 			mxEvent.consume(evt);
+		// 		}, function(evt)
+		// 		{
+		// 			mxEvent.consume(evt);
+		// 		}, function(evt)
+		// 		{
+		// 			mxEvent.consume(evt);
+		// 		});
+		//
+		// 		window.setTimeout(function()
+		// 		{
+		// 			input.focus();
+		// 		}, 0);
+		//
+		// 		if (EditorUi.isElectronApp)
+		// 		{
+		// 			editorUi.actions.addAction('website...', function()
+		// 			{
+		// 				editorUi.openLink('https://www.drawio.com');
+		// 			});
+		//
+		// 			editorUi.actions.addAction('check4Updates', function()
+		// 			{
+		// 				editorUi.checkForUpdates();
+		// 			});
+		//
+		// 			this.addMenuItems(menu, ['-', 'keyboardShortcuts', 'quickStart',
+		// 				'website', 'support', '-'], parent);
+		//
+		// 			if (urlParams['disableUpdate'] != '1')
+		// 			{
+		// 				this.addMenuItems(menu, ['check4Updates'], parent);
+		// 			}
+		//
+		// 			this.addMenuItems(menu, ['openDevTools', '-', 'about'], parent);
+		// 		}
+		// 		else
+		// 		{
+		// 			this.addMenuItems(menu, ['-', 'keyboardShortcuts',
+		// 				'quickStart', 'support', '-', 'about'], parent);
+		// 		}
+		// 	}
+		//
+		// 	if (urlParams['test'] == '1')
+		// 	{
+		// 		menu.addSeparator(parent);
+		// 		this.addSubmenu('testDevelop', menu, parent);
+		// 	}
+		// })));
 		
 		editorUi.actions.addAction('languageCode...', function()
 		{
@@ -4309,14 +4309,14 @@
 		this.put('pages', new Menu(mxUtils.bind(this, function(menu, parent)
 		{
 			var page = editorUi.currentPage;
-			
+
 			menu.addItem(mxResources.get('insertPage'), null, mxUtils.bind(this, function()
 			{
 				editorUi.insertPage();
 			}), parent);
 
 			menu.addSeparator(parent);
-			
+
 			if (editorUi.pages != null)
 			{
 				for (var i = 0; i < editorUi.pages.length; i++)
@@ -4343,7 +4343,7 @@
 						item.setAttribute('title', editorUi.pages[index].getName() +
 							' (' + (index + 1) + '/' + editorUi.pages.length + ')' +
 							((id != null) ? ' [' + id + ']' : ''));
-						
+
 						// Adds checkmark to current page
 						if (editorUi.pages[index] == page)
 						{
@@ -4767,7 +4767,7 @@
 				menu.addSeparator(parent);
 			}
 
-			editorUi.menus.addSubmenu('help', menu, parent);
+			// editorUi.menus.addSubmenu('help', menu, parent);
 			menu.addSeparator(parent);
 
 			if (urlParams['embed'] == '1')
@@ -4798,11 +4798,12 @@
 					editorUi.menus.addMenuItems(menu, ['exit'], parent);
 				}
 			}
-			
-			if (urlParams['embed'] != '1' && file != null)
-			{
-				editorUi.menus.addMenuItems(menu, ['-', 'close'], parent);
-			}
+
+			// TODO 关闭按钮
+			// if (urlParams['embed'] != '1' && file != null)
+			// {
+			// 	editorUi.menus.addMenuItems(menu, ['-', 'close'], parent);
+			// }
 		})));
 
 		this.put('save', new Menu(mxUtils.bind(this, function(menu, parent)
