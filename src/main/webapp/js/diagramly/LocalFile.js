@@ -11,7 +11,7 @@
 LocalFile = function(ui, data, title, temp, fileHandle, desc)
 {
 	DrawioFile.call(this, ui, data);
-	
+
 	this.title = title;
 	this.mode = (temp) ? null : App.MODE_DEVICE;
 	this.fileHandle = fileHandle;
@@ -23,7 +23,7 @@ mxUtils.extend(LocalFile, DrawioFile);
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -43,7 +43,7 @@ LocalFile.prototype.isAutosaveOptional = function()
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -54,7 +54,7 @@ LocalFile.prototype.getMode = function()
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -65,7 +65,7 @@ LocalFile.prototype.getTitle = function()
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -76,7 +76,7 @@ LocalFile.prototype.isRenamable = function()
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -87,7 +87,7 @@ LocalFile.prototype.save = function(revision, success, error)
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -98,7 +98,7 @@ LocalFile.prototype.saveAs = function(title, success, error)
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -116,8 +116,8 @@ LocalFile.prototype.getDescriptor = function()
 };
 
 /**
-* Updates the descriptor of this file with the one from the given file.
-*/
+ * Updates the descriptor of this file with the one from the given file.
+ */
 LocalFile.prototype.setDescriptor = function(desc)
 {
 	this.desc = desc;
@@ -125,7 +125,7 @@ LocalFile.prototype.setDescriptor = function(desc)
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -146,7 +146,7 @@ LocalFile.prototype.getLatestVersion = function(success, error)
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -157,7 +157,7 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 		this.fileHandle = null;
 		this.desc = null;
 	}
-	
+
 	this.title = title;
 
 	// Updates data after changing file name
@@ -165,22 +165,22 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 	{
 		this.updateFileData();
 	}
-	
+
 	var binary = this.ui.useCanvasForExport && /(\.png)$/i.test(this.getTitle());
 	this.setShadowModified(false);
 	var savedData = this.getData();
-	
+
 	var done = mxUtils.bind(this, function()
 	{
 		this.setModified(this.getShadowModified());
 		this.contentChanged();
-		
+
 		if (success != null)
 		{
 			success();
 		}
 	});
-	
+
 	var doSave = mxUtils.bind(this, function(data)
 	{
 		if (this.fileHandle != null)
@@ -190,21 +190,21 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 			{
 				this.savingFileTime = new Date();
 				this.savingFile = true;
-				
+
 				var errorWrapper = mxUtils.bind(this, function(e)
 				{
 					this.savingFile = false;
-					
+
 					if (error != null)
 					{
 						// Wraps error object to offer save status option
 						error({error: e});
 					}
 				});
-				
+
 				// Saves a copy as a draft while saving
 				this.saveDraft();
-				
+
 				this.fileHandle.createWritable().then(mxUtils.bind(this, function(writable)
 				{
 					this.fileHandle.getFile().then(mxUtils.bind(this, function(newDesc)
@@ -214,8 +214,8 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 						EditorUi.debug('LocalFile.saveFile', [this],
 							'desc', [this.desc], 'newDesc', [newDesc],
 							'conflict', this.desc.lastModified !=
-								newDesc.lastModified);
-						
+							newDesc.lastModified);
+
 						if (this.desc.lastModified == newDesc.lastModified)
 						{
 							writable.write((binary) ? this.ui.base64ToBlob(data, 'image/png') : data).then(mxUtils.bind(this, function()
@@ -230,7 +230,7 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 											this.savingFile = false;
 											this.desc = desc;
 											this.fileSaved(savedData, lastDesc, done, errorWrapper);
-											
+
 											// Deletes draft after saving
 											this.removeDraft();
 										}
@@ -261,7 +261,6 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 			{
 				this.ui.doSaveLocalFile(data, title, (binary) ?
 					'image/png' : 'text/xml', binary);
-				done();
 			}
 			else
 			{
@@ -269,58 +268,27 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 				{
 					var dot = title.lastIndexOf('.');
 					var format = (dot > 0) ? title.substring(dot + 1) : 'xml';
-	
+
 					// Do not update modified flag
-					var userReq = new mxXmlRequest(SAVE_URL, 'format=' + format +
+					new mxXmlRequest(SAVE_URL, 'format=' + format +
 						'&xml=' + encodeURIComponent(data) +
 						'&filename=' + encodeURIComponent(title) +
-						((binary) ? '&binary=1' : ''));
-					// var temp = this.authToken + ' ' +  _token;
-
-					// userReq.setRequestHeaders = function(request, params)
-					// {
-					// 	request.setRequestHeader('Authorization', temp);
-					// };
-
-					userReq.send(mxUtils.bind(this, function(e)
-					{
-						console.log(userReq)
-						console.log(e)
-						if (userReq.getStatus() === 401)
-						{
-							this.ui.showError(mxResources.get('error'), "401: 无权访问", mxResources.get('ok'));
-							error()
-						}
-						else if (userReq.getStatus() === 404) {
-							this.ui.showError(mxResources.get('error'), "404: 找不到资源", mxResources.get('ok'));
-							error()
-						} else if (userReq.getStatus() < 200 || userReq.getStatus() >= 300) {
-							this.ui.showError(mxResources.get('error'), userReq.getStatus() + ": " + userReq.request.statusText, mxResources.get('ok'));
-							error()
-						} else {
-							console.log(userReq.getText());
-							this.ui.showError("提示", "保存成功", mxResources.get('ok'));
-							done();
-						}
-					}), function(e) {
-						console.log(e);
-						error()
-					});
+						((binary) ? '&binary=1' : '')).
+					simulate(document, '_blank');
 				}
 				else
 				{
 					this.ui.handleError({message: mxResources.get('drawingTooLarge')}, mxResources.get('error'), mxUtils.bind(this, function()
 					{
-						// mxUtils.popup(data);
+						mxUtils.popup(data);
 					}));
-					error()
 				}
 			}
 
-			// done();
+			done();
 		}
 	});
-	
+
 	if (binary)
 	{
 		var p = this.ui.getPngFileProperties(this.ui.fileNode);
@@ -339,7 +307,7 @@ LocalFile.prototype.saveFile = function(title, revision, success, error, useCurr
 
 /**
  * Translates this point by the given vector.
- * 
+ *
  * @param {number} dx X-coordinate of the translation.
  * @param {number} dy Y-coordinate of the translation.
  */
@@ -347,7 +315,7 @@ LocalFile.prototype.rename = function(title, success, error)
 {
 	this.title = title;
 	this.descriptorChanged();
-	
+
 	if (success != null)
 	{
 		success();
