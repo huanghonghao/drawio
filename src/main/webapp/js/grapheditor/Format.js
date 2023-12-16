@@ -360,14 +360,26 @@ Format.prototype.immediateRefresh = function()
 		label.style.borderLeftWidth = '1px';
 		label.style.cursor = 'pointer';
 		label.style.width = ss.cells.length == 0 ? '100%' :
-			(containsLabel ? '50%' : '33.3%');
+			(containsLabel ? '50%' : '25%');
 		var label2 = label.cloneNode(false);
 		var label3 = label2.cloneNode(false);
+		var label1 = label.cloneNode(false);
 
 		// Workaround for ignored background in IE
 		label2.style.backgroundColor = Format.inactiveTabBackgroundColor;
 		label3.style.backgroundColor = Format.inactiveTabBackgroundColor;
-		
+		label1.style.backgroundColor = Format.inactiveTabBackgroundColor;
+
+		//properties
+		mxUtils.write(label1, mxResources.get("properties"));
+		div.appendChild(label1);
+
+		var propertiesPanel = div.cloneNode(false);
+		propertiesPanel.style.display = "none";
+		this.panels.push(new PropertiesPanel(this, ui, propertiesPanel));
+		this.container.appendChild(propertiesPanel);
+		addClickHandler(label1, propertiesPanel, idx++);
+
 		// Style
 		if (containsLabel)
 		{
@@ -7023,3 +7035,435 @@ DiagramFormatPanel.prototype.destroy = function()
 		this.gridEnabledListener = null;
 	}
 };
+
+/**
+ * 属性栏
+ */
+PropertiesPanel = function(format, editorUi, container) {
+	BaseFormatPanel.call(this, format, editorUi, container);
+	this.init();
+}
+mxUtils.extend(PropertiesPanel, BaseFormatPanel);
+
+PropertiesPanel.prototype.init = function () {
+	this.container.style.borderBottom = "none";
+	this.addProperties(this.container);
+};
+
+PropertiesPanel.prototype.addProperties = function(container) {
+	var ui = this.editorUi;
+	var div = document.createElement('div');
+	var graph = ui.editor.graph;
+	const cell = graph.getSelectionCell();
+
+	var value = graph.getModel().getValue(cell);
+
+
+	// Converts the value to an XML node
+	if (!mxUtils.isNode(value))
+	{
+		var doc = mxUtils.createXmlDocument();
+		var obj = doc.createElement('object');
+		obj.setAttribute('label', value || '');
+		value = obj;
+	}
+
+	// 使用占位符
+	value.setAttribute('placeholders', '1');
+
+	var meta = {};
+
+	try
+	{
+		var temp = mxUtils.getValue(ui.editor.graph.getCurrentCellStyle(cell), 'metaData', null);
+
+		if (temp != null)
+		{
+			meta = JSON.parse(temp);
+		}
+	}
+	catch (e)
+	{
+		// ignore
+	}
+
+	// Creates the dialog contents
+	var form = new mxForm('properties');
+	form.table.style.width = '100%';
+
+	var attrs = value.attributes;
+	var names = [];
+	var texts = [];
+	var count = 0;
+
+	// 保存数据
+	var saveData = function()
+	{
+		try
+		{
+			// Clones and updates the value
+			value = value.cloneNode(true);
+			var removeLabel = false;
+
+			for (var i = 0; i < names.length; i++)
+			{
+				if (texts[i] == null)
+				{
+					value.removeAttribute(names[i]);
+				}
+				else
+				{
+					value.setAttribute(names[i], texts[i].value);
+					removeLabel = removeLabel || (names[i] == 'placeholder' &&
+						value.getAttribute('placeholders') == '1');
+				}
+			}
+
+			// Removes label if placeholder is assigned
+			if (removeLabel)
+			{
+				value.removeAttribute('label');
+			}
+
+			// Updates the value of the cell (undoable)
+			graph.getModel().setValue(cell, value);
+		}
+		catch (e)
+		{
+			mxUtils.alert(e);
+		}
+	};
+
+	var addRemoveButton = function(wrapper, name)
+	{
+		var removeAttr = document.createElement('a');
+		var img = mxUtils.createImage(Dialog.prototype.closeImage);
+		img.style.height = '9px';
+		img.style.fontSize = '9px';
+		img.style.marginBottom = (mxClient.IS_IE11) ? '-1px' : '5px';
+
+		removeAttr.className = 'geButton';
+		removeAttr.setAttribute('title', mxResources.get('delete'));
+		removeAttr.style.position = 'absolute';
+		removeAttr.style.top = '4px';
+		removeAttr.style.right = '0px';
+		removeAttr.style.margin = '0px';
+		removeAttr.style.width = '9px';
+		removeAttr.style.height = '9px';
+		removeAttr.style.cursor = 'pointer';
+		removeAttr.appendChild(img);
+
+		var removeAttrFn = (function(name)
+		{
+			return function()
+			{
+				var count = 0;
+
+				for (var j = 0; j < names.length; j++)
+				{
+					if (names[j] == name)
+					{
+						texts[j] = null;
+						form.table.deleteRow(count);
+
+						break;
+					}
+
+					if (texts[j] != null)
+					{
+						count++;
+					}
+				}
+				saveData();
+			};
+		})(name);
+
+		mxEvent.addListener(removeAttr, 'click', removeAttrFn);
+		wrapper.appendChild(removeAttr);
+	};
+
+	var addText = function (name, value, deletable = true) {
+		var text = form.addText(name, value, 'text');
+		text.style.width = '100%';
+		text.style.padding = '4px';
+		mxEvent.addListener(text, 'change', saveData);
+
+		var wrapper = document.createElement('div');
+		wrapper.style.position = 'relative';
+		wrapper.style.paddingRight = '20px';
+		wrapper.style.boxSizing = 'border-box';
+		wrapper.style.width = '100%';
+
+		if (!!deletable) {
+			addRemoveButton(wrapper, name)
+		}
+		var parent = text.parentNode;
+		wrapper.appendChild(text);
+		parent.appendChild(wrapper);
+		return text;
+	};
+
+	var initField = function(index, name, value, deletable)
+	{
+		names[index] = name;
+		texts[index] = addText(names[count], value, deletable);
+
+		if (value.indexOf('\n') > 0)
+		{
+			texts[index].setAttribute('rows', '2');
+		}
+
+		if (meta[name] != null && meta[name].editable == false)
+		{
+			texts[index].setAttribute('disabled', 'disabled');
+		}
+	};
+
+	// ----------------初始化属性---------------
+	var temp = [];
+	var defaultProp = [];
+	var isLayer = graph.getModel().getParent(cell) == graph.getModel().getRoot();
+
+	for (var i = 0; i < attrs.length; i++)
+	{
+		if ((attrs[i].nodeName != 'label' || Graph.translateDiagram ||
+			isLayer) && attrs[i].nodeName != 'placeholders')
+		{
+			if (attrs[i].nodeName == 'defaultProp') {
+				defaultProp = attrs[i].nodeValue.split(',');
+				continue;
+			}
+			temp.push({name: attrs[i].nodeName, value: attrs[i].nodeValue});
+		}
+	}
+
+	// Sorts by name
+/*	temp.sort(function(a, b)
+	{
+		if (a.name < b.name)
+		{
+			return -1;
+		}
+		else if (a.name > b.name)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	});*/
+
+	for (var i = 0; i < temp.length; i++)
+	{
+		initField(count, temp[i].name, temp[i].value, !defaultProp.includes(temp[i].name));
+		count++;
+	}
+
+	var top = document.createElement('div');
+	top.style.position = 'absolute';
+	top.style.top = '50px';
+	top.style.left = '10px';
+	top.style.right = '10px';
+	top.style.bottom = '80px';
+	top.style.overflowY = 'auto';
+	top.style.zIndex = '99';
+
+	top.appendChild(form.table);
+
+	var newProp = document.createElement('div');
+	newProp.style.display = 'flex';
+	newProp.style.alignItems = 'center';
+	newProp.style.boxSizing = 'border-box';
+	newProp.style.paddingRight = '100px';
+	newProp.style.whiteSpace = 'nowrap';
+	newProp.style.marginTop = '6px';
+	newProp.style.width = '100%';
+
+	// 属性名称
+	var nameInput = document.createElement('input');
+	nameInput.setAttribute('placeholder', mxResources.get('enterPropertyName'));
+	nameInput.setAttribute('type', 'text');
+	nameInput.setAttribute('size', (mxClient.IS_IE || mxClient.IS_IE11) ? '36' : '40');
+	nameInput.style.boxSizing = 'border-box';
+	nameInput.style.borderWidth = '1px';
+	nameInput.style.borderStyle = 'solid';
+	nameInput.style.marginLeft = '2px';
+	nameInput.style.padding = '4px';
+	nameInput.style.width = '100%';
+
+	newProp.appendChild(nameInput);
+	top.appendChild(newProp);
+	div.appendChild(top);
+
+    // 添加按钮
+	var addBtn = mxUtils.button(mxResources.get('addProperty'), function()
+	{
+		var name = nameInput.value;
+
+		// Avoid ':' in attribute names which seems to be valid in Chrome
+		if (name.length > 0 && name != 'label' && name != 'id' &&
+			name != 'placeholders' && name.indexOf(':') < 0)
+		{
+			try
+			{
+				var idx = mxUtils.indexOf(names, name);
+
+				if (idx >= 0 && texts[idx] != null)
+				{
+					texts[idx].focus();
+				}
+				else
+				{
+					// Checks if the name is valid
+					var clone = value.cloneNode(false);
+					clone.setAttribute(name, '');
+
+					if (idx >= 0)
+					{
+						names.splice(idx, 1);
+						texts.splice(idx, 1);
+					}
+
+					names.push(name);
+					// var text = form.addTextarea(name + ':', '', 2);
+					var text = addText(name, '')
+					texts.push(text);
+
+					text.focus();
+					// 保存空属性
+					saveData();
+				}
+
+				// addBtn.setAttribute('disabled', 'disabled');
+				nameInput.value = '';
+			}
+			catch (e)
+			{
+				mxUtils.alert(e);
+			}
+		}
+		else
+		{
+			mxUtils.alert(mxResources.get('invalidName'));
+		}
+	});
+
+	mxEvent.addListener(nameInput, 'keypress', function(e)
+	{
+		if (e.keyCode == 13 )
+		{
+			addBtn.click();
+		}
+	});
+
+	addBtn.setAttribute('title', mxResources.get('addProperty'));
+	addBtn.setAttribute('disabled', 'disabled');
+	addBtn.style.textOverflow = 'ellipsis';
+	addBtn.style.position = 'absolute';
+	addBtn.style.overflow = 'hidden';
+	addBtn.style.width = '80px';
+	addBtn.style.right = '0px';
+	addBtn.className = 'geBtn';
+	newProp.appendChild(addBtn);
+
+	function updateAddBtn()
+	{
+		if (nameInput.value.length > 0)
+		{
+			addBtn.removeAttribute('disabled');
+		}
+		else
+		{
+			addBtn.setAttribute('disabled', 'disabled');
+		}
+	};
+
+	mxEvent.addListener(nameInput, 'keyup', updateAddBtn);
+
+	// Catches all changes that don't fire a keyup (such as paste via mouse)
+	mxEvent.addListener(nameInput, 'change', updateAddBtn);
+
+	/*let cellValue = '';
+	let cellCode = '';
+	let cellDesc = ''
+	if(mxUtils.isNode(cell.value)) {
+		cellValue = cell.value.getAttribute('value');
+		cellCode = cell.value.getAttribute("code");
+		cellDesc = cell.value.getAttribute("desc");
+	}else {
+		cellValue = cell.value;
+		cellCode = cell.code || '';
+		cellDesc = cell.desc || '';
+	}
+	var stylePanel = this.createPanel();
+	stylePanel.style.paddingTop = "2px";
+	stylePanel.style.paddingBottom = "2px";
+	stylePanel.style.display = "flex";
+	stylePanel.style.alignItems = 'center';
+	stylePanel.style.gap = '16px';
+	stylePanel.style.marginLeft = "-2px";
+	stylePanel.style.borderWidth = "0px";
+	stylePanel.style.marginTop = "16px";
+
+	mxUtils.write(stylePanel, '编码');
+
+	var input = document.createElement("input");
+	input.style.width = "160px";
+	input.setAttribute('placeholder', '请输入');
+	input.value = cellCode;
+
+	stylePanel.appendChild(input);
+
+	var stylePanel1 = stylePanel.cloneNode(false);
+	var input1 = input.cloneNode(false)
+	mxUtils.write(stylePanel1, "名称");
+	input1.value = cellValue;
+	stylePanel1.appendChild(input1);
+
+	var stylePanel2 = stylePanel.cloneNode(false);
+	var input2 = input.cloneNode(false);
+	input2.value = cellDesc;
+	mxUtils.write(stylePanel2, "描述");
+	stylePanel2.appendChild(input2);
+
+	container.appendChild(stylePanel);
+	container.appendChild(stylePanel1);
+	container.appendChild(stylePanel2);
+
+	function updateCode(evt) {
+		graph.getModel().beginUpdate();
+		try {
+			// console.log(evt.target.value)
+			// console.log(input1.value)
+			cell.code = evt.target.value;
+			graph.getModel().setValue(cell, input1.value);
+		} finally {
+			graph.getModel().endUpdate();
+		}
+	}
+	function updateValue(evt) {
+
+		graph.getModel().beginUpdate();
+		try {
+			graph.getModel().setValue(cell, evt.target.value);
+		} finally {
+			graph.getModel().endUpdate();
+		}
+	}
+	function updateDesc(evt) {
+		graph.getModel().beginUpdate();
+		try {
+			cell.desc = evt.target.value;
+			graph.getModel().setValue(cell, input1.value);
+		} finally {
+			graph.getModel().endUpdate();
+		}
+	}
+
+	mxEvent.addListener(input, 'blur', updateCode)
+	mxEvent.addListener(input1, "blur", updateValue);
+	mxEvent.addListener(input2, "blur", updateDesc);*/
+	container.appendChild(div);
+	return container;
+}

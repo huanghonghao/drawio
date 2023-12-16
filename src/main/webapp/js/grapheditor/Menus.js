@@ -1746,8 +1746,9 @@ Menus.prototype.addPopupMenuCellEditItems = function(menu, cell, evt, parent)
 {
 	var graph = this.editorUi.editor.graph;
 	var state = graph.view.getState(cell);
-	this.addMenuItems(menu, ['-', 'editStyle', 'editData', 'editLink'], parent, evt);
-	
+	// this.addMenuItems(menu, ['-', 'editStyle', 'editData', 'editLink'], parent, evt);
+	this.addMenuItems(menu, ['-', 'editStyle', 'editLink'], parent, evt);
+
 	// Shows edit image action if there is an image in the style
 	if (graph.getModel().isVertex(cell) && mxUtils.getValue(state.style, mxConstants.STYLE_IMAGE, null) != null)
 	{

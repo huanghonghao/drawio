@@ -4147,7 +4147,10 @@
 		viewPanelsMenu.funct = function(menu, parent)
 		{
 			var file = editorUi.getCurrentFile();
-			editorUi.menus.addMenuItems(menu, ['toggleShapes', 'format', 'ruler',
+			// TODO 禁用图元
+			/*editorUi.menus.addMenuItems(menu, ['toggleShapes', 'format', 'ruler',
+				'-', 'findReplace', 'layers', 'tags', 'outline', '-'], parent);*/
+			editorUi.menus.addMenuItems(menu, ['format', 'ruler',
 				'-', 'findReplace', 'layers', 'tags', 'outline', '-'], parent);
 
 			if (editorUi.commentsSupported())
@@ -4208,20 +4211,21 @@
 				this.addMenuItems(menu, (['format', 'outline', 'layers', 'tags']).
 					concat((editorUi.commentsSupported()) ?
 					['comments', '-'] : ['-']));
-				
-				this.addMenuItems(menu, ['-', 'search'], parent);
-				
-				if (isLocalStorage || mxClient.IS_CHROMEAPP)
-				{
-					var item = this.addMenuItem(menu, 'scratchpad', parent);
-					
-					if (!editorUi.isOffline() || mxClient.IS_CHROMEAPP || EditorUi.isElectronApp)
-					{
-						this.addLinkToItem(item, 'https://www.drawio.com/doc/faq/scratchpad');
-					}
-				}
-				
-				this.addMenuItems(menu, ['toggleShapes', '-', 'pageView', 'pageScale']);
+				// TODO 禁用图元
+				// this.addMenuItems(menu, ['-', 'search'], parent);
+				//
+				// if (isLocalStorage || mxClient.IS_CHROMEAPP)
+				// {
+				// 	var item = this.addMenuItem(menu, 'scratchpad', parent);
+				//
+				// 	if (!editorUi.isOffline() || mxClient.IS_CHROMEAPP || EditorUi.isElectronApp)
+				// 	{
+				// 		this.addLinkToItem(item, 'https://www.drawio.com/doc/faq/scratchpad');
+				// 	}
+				// }
+				// TODO 禁用图元
+				// this.addMenuItems(menu, ['toggleShapes', '-', 'pageView', 'pageScale']);
+				this.addMenuItems(menu, ['-', 'pageView', 'pageScale']);
 				this.addSubmenu('units', menu, parent);
 				menu.addSeparator(parent);
 

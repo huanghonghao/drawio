@@ -4814,7 +4814,7 @@ EditorUi.prototype.createDivs = function()
 	
 	if (!this.editor.chromeless)
 	{
-		this.tabContainer = this.createTabContainer();
+		// this.tabContainer = this.createTabContainer();
 	}
 	else
 	{
@@ -4863,15 +4863,15 @@ EditorUi.prototype.createUi = function()
 		// Inserts into DOM
 		this.container.appendChild(this.menubarContainer);
 	}
-
+    // TODO 禁用图元
 	// Creates the sidebar
-	this.sidebar = (this.editor.chromeless) ? null : this.createSidebar(this.sidebarContainer);
-	
-	if (this.sidebar != null)
-	{
-		this.container.appendChild(this.sidebarContainer);
-	}
-	
+	// this.sidebar = (this.editor.chromeless) ? null : this.createSidebar(this.sidebarContainer);
+
+	// if (this.sidebar != null)
+	// {
+	// 	this.container.appendChild(this.sidebarContainer);
+	// }
+
 	// Creates the format sidebar
 	this.format = (this.editor.chromeless || !this.formatEnabled) ? null : this.createFormat(this.formatContainer);
 	
@@ -4905,11 +4905,11 @@ EditorUi.prototype.createUi = function()
 		this.container.appendChild(this.toolbarContainer);
 	}
 
-	// HSplit
+	// HSplit 图元容器宽度拖拉
 	if (this.sidebar != null)
 	{
 		this.container.appendChild(this.hsplit);
-		
+
 		this.addSplitHandler(this.hsplit, true, 0, mxUtils.bind(this, function(value)
 		{
 			this.hsplitPosition = value;

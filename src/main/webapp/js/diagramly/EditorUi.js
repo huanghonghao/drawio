@@ -10605,7 +10605,8 @@
 			this.keyHandler.bindAction(82, false, 'insertRhombus'); // R
 			this.keyHandler.bindAction(67, false, 'insertEdge'); // C
 			this.keyHandler.bindAction(88, false, 'insertFreehand'); // X
-			this.keyHandler.bindAction(75, true, 'toggleShapes', true); // Ctrl+Shift+K
+			// TODO 禁用图元
+			// this.keyHandler.bindAction(75, true, 'toggleShapes', true); // Ctrl+Shift+K
 			this.altShiftActions[81] = 'copyStyle'; // Alt+Shift+Q
 			this.altShiftActions[87] = 'pasteStyle'; // Alt+Shift+W
 			this.altShiftActions[83] = 'synchronize'; // Alt+Shift+S
@@ -11910,7 +11911,7 @@
 			// Shapes window
 			var libs = Editor.enableCustomLibraries && (urlParams['embed'] != '1' ||
 				urlParams['libraries'] == '1');
-			
+
 			this.createShapesWindow();
 			this.sidebarContainer.className = '';
 			this.sidebarContainer.style.position = 'absolute';
